@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Estate Investment Model</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a; --text: #e4e4e7;
+    --muted: #8b8d97; --accent: #6366f1; --accent-hover: #818cf8;
+    --green: #22c55e; --red: #ef4444; --yellow: #eab308; --blue: #3b82f6;
+    --input-bg: #12141c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.5; }
+  .app { max-width: 1440px; margin: 0 auto; padding: 20px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 13px; transition: all .15s; }
+  .btn:hover { border-color: var(--accent); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-danger { border-color: var(--red); color: var(--red); }
+  .btn-danger:hover { background: var(--red); color: #fff; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .g5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-blue { background: var(--blue); } .dot-green { background: var(--green); } .dot-yellow { background: var(--yellow); } .dot-red { background: var(--red); } .dot-accent { background: var(--accent); }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+  .field input, .field select { width: 100%; padding: 7px 10px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; outline: none; transition: border .15s; }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .fr { display: flex; gap: 8px; }
+  .fr .field { flex: 1; }
+  .sfx { position: relative; }
+  .sfx input { padding-right: 30px; }
+  .sfx::after { content: attr(data-sfx); position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12px; pointer-events: none; }
+  .stat { text-align: center; padding: 10px; }
+  .sv { font-size: 22px; font-weight: 700; }
+  .sl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .sp { color: var(--green); } .sn { color: var(--red); } .su { color: var(--blue); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 8px 10px; font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  .tr { text-align: right; } .tc { text-align: center; }
+  .tg { color: var(--green); } .tre { color: var(--red); } .tm { color: var(--muted); } .tb { color: var(--blue); }
+  .tw { font-weight: 600; } .rh { background: rgba(99,102,241,.06); }
+  .opp-list { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .opp-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 12px; transition: all .15s; }
+  .opp-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .opp-chip:hover:not(.active) { border-color: var(--accent); }
+  .stab { display: flex; gap: 4px; margin-bottom: 12px; }
+  .st { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-size: 12px; }
+  .st.active { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,.1); }
+  .fb { border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+  .fh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .fh span { font-size: 12px; font-weight: 600; }
+  .hidden { display: none; }
+  .divider { border-top: 1px solid var(--border); margin: 12px 0; }
+  .row-pair { display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px; }
+  select.sm { padding:4px 8px;background:var(--input-bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px; }
+  @media (max-width: 1000px) { .g2,.g3,.g4,.g5 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Real Estate Investment Model</h1>
+    <button class="btn btn-primary" onclick="addOpp()">+ New Opportunity</button>
+  </header>
+  <div class="opp-list" id="oppList"></div>
+
+  <div id="main" class="hidden">
+    <!-- KPIs -->
+    <div class="grid g5" style="margin-bottom:16px;" id="kpiBar">
+      <div class="card stat"><div class="sv su" id="kGY">-</div><div class="sl">Gross Yield</div></div>
+      <div class="card stat"><div class="sv sp" id="kNY">-</div><div class="sl">Net Yield</div></div>
+      <div class="card stat"><div class="sv sp" id="kIRR">-</div><div class="sl">IRR (Levered)</div></div>
+      <div class="card stat"><div class="sv su" id="kIRRU">-</div><div class="sl">IRR (Unlevered)</div></div>
+      <div class="card stat"><div class="sv su" id="kMult">-</div><div class="sl">Multiple (Levered)</div></div>
+    </div>
+
+    <!-- Row 1: Property / Investment / Operations -->
+    <div class="grid g3" style="margin-bottom:16px;">
+      <!-- Property -->
+      <div class="card">
+        <div class="card-title"><span class="dot dot-blue"></span>Property</div>
+        <div class="field"><label>Property Name</label><input id="propName" oninput="calc()"></div>
+        <div class="fr">
+          <div class="field"><label>Location</label><input id="propLocation" oninput="calc()"></div>
+          <div class="field"><label>Country</label>
+            <select id="propCountry" onchange="onCountryChange();calc()">
+              <option value="FR">France</option>
+              <option value="ES">Spain</option>
+              <option value="PT">Portugal</option>
+              <option value="IT">Italy</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>Total sqm</label><input type="number" id="propSqm" oninput="calc()"></div>
+          <div class="field"><label>Buildable sqm (if different)</label><input type="number" id="propBSqm" oninput="calc()"></div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>Est. Acquisition Date</label><input type="date" id="propDate" oninput="calc()"></div>
+          <div class="field"><label>Priority</label>
+            <select id="propPriority"><option>Low</option><option selected>Mid</option><option>High</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investment / Costs -->
+      <div class="card">
+        <div class="card-title"><span class="dot dot-yellow"></span>Investment & Costs</div>
+        <div class="field"><label>Purchase Price (&euro;)</label><input type="number" id="invPrice" oninput="calc()"></div>
+        <div class="fr">
+          <div class="field sfx" data-sfx="%"><label>Transfer Tax / ITP</label><input type="number" id="invTax" step="0.1" oninput="calc()"></div>
+          <div class="field"><label>Notary & Registry (&euro;)</label><input type="number" id="invNotary" oninput="calc()"></div>
+        </div>
+        <div class="fr">
+          <div class="field sfx" data-sfx="%"><label>Broker / Agency Fee</label><input type="number" id="invBroker" step="0.1" oninput="calc()"></div>
+          <div class="field"><label>Other Acq. Costs (&euro;)</label><input type="number" id="invOtherAcq" oninput="calc()"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="fr">
+          <div class="field"><label>Hard Costs / Construction (&euro;/sqm)</label><input type="number" id="invHardPerSqm" oninput="calc()"></div>
+          <div class="field"><label>Soft Costs (&euro;/sqm)</label><input type="number" id="invSoftPerSqm" oninput="calc()"></div>
+        </div>
+        <div class="fr">
+          <div class="field"><label>FF&E / Furnishing (&euro;/sqm)</label><input type="number" id="invFFEPerSqm" oninput="calc()"></div>
+          <div class="field sfx" data-sfx="%"><label>Contingency (% hard)</label><input type="number" id="invContingency" step="1" oninput="calc()"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="row-pair"><span class="tm">Acquisition Costs</span><span class="tw" id="dAcq">-</span></div>
+        <div class="row-pair"><span class="tm">Hard Costs</span><span class="tw" id="dHard">-</span></div>
+        <div class="row-pair"><span class="tm">Soft Costs</span><span class="tw" id="dSoft">-</span></div>
+        <div class="row-pair"><span class="tm">FF&E</span><span class="tw" id="dFFE">-</span></div>
+        <div class="row-pair"><span class="tm">Contingency</span><span class="tw" id="dCont">-</span></div>
+        <div class="divider"></div>
+        <div class="row-pair"><span class="tw">Total Capital Required</span><span class="tw tb" id="dTotal">-</span></div>
+        <div class="row-pair"><span class="tm">Per sqm</span><span class="tw" id="dPerSqm">-</span></div>
+      </div>
+
+      <!-- Operations -->
+      <div class="card">
+        <div class="card-title"><span class="dot dot-green"></span>Operations (Yearly)</div>
+        <div class="field"><label>Gross Rents (&euro;/year)</label><input type="number" id="opsRents" oninput="calc()"></div>
+        <div class="field sfx" data-sfx="%"><label>Operating Charges (% of rents)</label><input type="number" id="opsCharges" step="0.1" oninput="calc()"></div>
+        <div class="field"><label>Property Taxes & Insurance (&euro;/year)</label><input type="number" id="opsTaxes" oninput="calc()"></div>
+        <div class="field"><label>Admin - Legal & Accounting (&euro;/year)</label><input type="number" id="opsAdmin" oninput="calc()"></div>
+        <div class="field sfx" data-sfx="%"><label>Maintenance & Renovations (% of rents)</label><input type="number" id="opsMaint" step="0.1" oninput="calc()"></div>
+        <div class="field sfx" data-sfx="%"><label>Annual Rent Growth</label><input type="number" id="opsGrowth" step="0.1" oninput="calc()"></div>
+        <div class="divider"></div>
+        <div class="row-pair"><span class="tm">Total Charges</span><span class="tw tre" id="dCharges">-</span></div>
+        <div class="row-pair"><span class="tm">% of Revenue</span><span class="tw" id="dChargesPct">-</span></div>
+        <div class="row-pair"><span class="tw">Net Operating Income</span><span class="tw tg" id="dNOI">-</span></div>
+      </div>
+    </div>
+
+    <!-- Row 2: Financing / Exit & Scenarios -->
+    <div class="grid g2" style="margin-bottom:16px;">
+      <!-- Financing -->
+      <div class="card">
+        <div class="card-title"><span class="dot dot-accent"></span>Financing</div>
+        <!-- Purchase -->
+        <div class="fb">
+          <div class="fh"><span>Purchase Financing</span>
+            <select id="finPType" onchange="calc()" class="sm">
+              <option value="equity">100% Equity</option>
+              <option value="bank" selected>Bank Loan</option>
+              <option value="private">Private Debt (short term)</option>
+            </select>
+          </div>
+          <div id="finPDebt">
+            <div class="fr">
+              <div class="field sfx" data-sfx="%"><label>Loan to Cost</label><input type="number" id="finPLTC" step="1" oninput="calc()"></div>
+              <div class="field sfx" data-sfx="%"><label>Interest Rate</label><input type="number" id="finPRate" step="0.1" oninput="calc()"></div>
+            </div>
+            <div class="fr">
+              <div class="field"><label>Term (years)</label><input type="number" id="finPAmort" oninput="calc()"></div>
+              <div class="field"><label>Loan Type</label>
+                <select id="finPLoanType" onchange="calc()">
+                  <option value="amortizing">Amortizing</option>
+                  <option value="interest_only">Interest Only</option>
+                  <option value="bullet">Bullet</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-pair"><span class="tm">Loan Amount</span><span class="tw" id="fPAmt">-</span></div>
+          </div>
+        </div>
+        <!-- Capex -->
+        <div class="fb">
+          <div class="fh"><span>Construction / Capex Financing</span>
+            <select id="finCType" onchange="calc()" class="sm">
+              <option value="equity">100% Equity</option>
+              <option value="bank" selected>Bank Loan</option>
+              <option value="private">Private Debt (short term)</option>
+            </select>
+          </div>
+          <div id="finCDebt">
+            <div class="fr">
+              <div class="field sfx" data-sfx="%"><label>Loan to Cost</label><input type="number" id="finCLTC" step="1" oninput="calc()"></div>
+              <div class="field sfx" data-sfx="%"><label>Interest Rate</label><input type="number" id="finCRate" step="0.1" oninput="calc()"></div>
+            </div>
+            <div class="fr">
+              <div class="field"><label>Term (years)</label><input type="number" id="finCAmort" oninput="calc()"></div>
+              <div class="field"><label>Loan Type</label>
+                <select id="finCLoanType" onchange="calc()">
+                  <option value="amortizing">Amortizing</option>
+                  <option value="interest_only">Interest Only</option>
+                  <option value="bullet">Bullet</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-pair"><span class="tm">Loan Amount</span><span class="tw" id="fCAmt">-</span></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="row-pair"><span class="tw">Total Debt</span><span class="tw" id="fDebt">-</span></div>
+        <div class="row-pair"><span class="tw">Total Equity Required</span><span class="tw tb" id="fEq">-</span></div>
+        <div class="row-pair"><span class="tm">Debt / Equity Ratio</span><span class="tw" id="fDE">-</span></div>
+        <div class="row-pair"><span class="tm">LTV (Debt / Total Capital)</span><span class="tw" id="fLTV">-</span></div>
+      </div>
+
+      <!-- Exit & Scenarios -->
+      <div class="card">
+        <div class="card-title"><span class="dot dot-red"></span>Exit & Scenario Analysis</div>
+        <div class="fr">
+          <div class="field"><label>Exit Year</label><input type="number" id="exitYear" oninput="calc()"></div>
+          <div class="field"><label>Exit Sale Price (&euro;)</label><input type="number" id="exitPrice" oninput="calc()"></div>
+        </div>
+        <div class="fr">
+          <div class="field sfx" data-sfx="%"><label>Cap Rate (net income)</label><input type="number" id="exitCapRate" step="0.1" oninput="calc()"></div>
+          <div class="field sfx" data-sfx="%"><label>Sale Fee / Commission</label><input type="number" id="exitFee" step="0.1" oninput="calc()"></div>
+        </div>
+        <div class="fr">
+          <div class="field sfx" data-sfx="%"><label>Capital Gains Tax</label><input type="number" id="exitCGT" step="0.1" oninput="calc()"></div>
+          <div class="field"><label>Sale Price / sqm</label><span class="tw tm" id="exitPSqm">-</span></div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-title"><span class="dot dot-green"></span>Scenario</div>
+        <div class="stab">
+          <button class="st active" data-sc="flip" onclick="setSc('flip',this)">Flip (Resell)</button>
+          <button class="st" data-sc="hold_sell" onclick="setSc('hold_sell',this)">Hold & Sell</button>
+          <button class="st" data-sc="hold_long" onclick="setSc('hold_long',this)">Hold Long Term</button>
+        </div>
+        <table id="scT">
+          <tr><td class="tm">Scenario</td><td class="tr tw" id="scN">-</td></tr>
+          <tr><td class="tm">Hold Period</td><td class="tr" id="scH">-</td></tr>
+          <tr><td class="tm">Total Equity Invested</td><td class="tr" id="scCI">-</td></tr>
+          <tr><td class="tm">Total Cash Returned</td><td class="tr tg" id="scCO">-</td></tr>
+          <tr><td class="tm">Net Profit</td><td class="tr tw" id="scP">-</td></tr>
+          <tr><td class="tm">IRR (Levered)</td><td class="tr tw" id="scIRR">-</td></tr>
+          <tr><td class="tm">IRR (Unlevered)</td><td class="tr" id="scIRRU">-</td></tr>
+          <tr><td class="tm">Investment Multiple</td><td class="tr" id="scMu">-</td></tr>
+          <tr><td class="tm">Avg Cash-on-Cash</td><td class="tr" id="scCoC">-</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Cash Flow Levered -->
+    <div class="card" style="margin-bottom:16px;overflow-x:auto;">
+      <div class="card-title"><span class="dot dot-green"></span>Cash Flows (Levered)</div>
+      <table id="cfL"></table>
+    </div>
+    <!-- Cash Flow Unlevered -->
+    <div class="card" style="margin-bottom:16px;overflow-x:auto;">
+      <div class="card-title"><span class="dot dot-blue"></span>Cash Flows (Unlevered)</div>
+      <table id="cfU"></table>
+    </div>
+    <!-- Amortization -->
+    <div class="card" style="margin-bottom:16px;overflow-x:auto;">
+      <div class="card-title"><span class="dot dot-accent"></span>Amortization Schedule</div>
+      <table id="amT"></table>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:40px;">
+      <button class="btn btn-danger" onclick="delOpp()">Delete Opportunity</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let opps = [], ci = -1, sc = 'hold_sell';
+
+const COUNTRY_DEFAULTS = {
+  FR: { tax: 7.5, notary: 0, broker: 0, label: 'Notary Fees (incl. in tax)' },
+  ES: { tax: 7, notary: 2400, broker: 3.7, label: 'ITP' },
+  PT: { tax: 6, notary: 1500, broker: 5, label: 'IMT' },
+  IT: { tax: 9, notary: 3000, broker: 3, label: 'Imposta di Registro' },
+  OTHER: { tax: 5, notary: 2000, broker: 0, label: 'Transfer Tax' }
+};
+
+function defOpp() {
+  return {
+    propName:'', propLocation:'', propCountry:'FR', propSqm:0, propBSqm:0, propDate:'2026-09-01', propPriority:'Mid',
+    invPrice:0, invTax:7.5, invNotary:0, invBroker:0, invOtherAcq:0,
+    invHardPerSqm:0, invSoftPerSqm:0, invFFEPerSqm:0, invContingency:5,
+    opsRents:0, opsCharges:50, opsTaxes:0, opsAdmin:0, opsMaint:1, opsGrowth:0,
+    finPType:'bank', finPLTC:60, finPRate:3, finPAmort:20, finPLoanType:'amortizing',
+    finCType:'bank', finCLTC:60, finCRate:3, finCAmort:15, finCLoanType:'amortizing',
+    exitYear:10, exitPrice:0, exitCapRate:4.5, exitFee:5, exitCGT:0
+  };
+}
+
+function beaune() {
+  return {
+    propName:'Beaune La Montagne', propLocation:'Beaune, France', propCountry:'FR', propSqm:256, propBSqm:0, propDate:'2026-09-01', propPriority:'Mid',
+    invPrice:650000, invTax:7.5, invNotary:0, invBroker:0, invOtherAcq:0,
+    invHardPerSqm:1200, invSoftPerSqm:0, invFFEPerSqm:200, invContingency:0,
+    opsRents:108405, opsCharges:50, opsTaxes:10000, opsAdmin:2160, opsMaint:1, opsGrowth:0,
+    finPType:'bank', finPLTC:60, finPRate:3, finPAmort:20, finPLoanType:'amortizing',
+    finCType:'bank', finCLTC:60, finCRate:3, finCAmort:15, finCLoanType:'amortizing',
+    exitYear:10, exitPrice:1350000, exitCapRate:4.5, exitFee:5, exitCGT:0
+  };
+}
+
+const fields = [
+  'propName','propLocation','propCountry','propSqm','propBSqm','propDate','propPriority',
+  'invPrice','invTax','invNotary','invBroker','invOtherAcq',
+  'invHardPerSqm','invSoftPerSqm','invFFEPerSqm','invContingency',
+  'opsRents','opsCharges','opsTaxes','opsAdmin','opsMaint','opsGrowth',
+  'finPType','finPLTC','finPRate','finPAmort','finPLoanType',
+  'finCType','finCLTC','finCRate','finCAmort','finCLoanType',
+  'exitYear','exitPrice','exitCapRate','exitFee','exitCGT'
+];
+
+function addOpp() {
+  opps.push(opps.length === 0 ? beaune() : defOpp());
+  if (opps[opps.length-1].propName === '') opps[opps.length-1].propName = 'Opportunity ' + opps.length;
+  ci = opps.length - 1; save(); renderChips(); loadOpp();
+}
+function selOpp(i) { saveInputs(); ci = i; renderChips(); loadOpp(); }
+function delOpp() {
+  if (ci < 0) return;
+  opps.splice(ci, 1); ci = Math.min(ci, opps.length - 1);
+  save(); renderChips();
+  if (ci >= 0) loadOpp(); else document.getElementById('main').classList.add('hidden');
+}
+function renderChips() {
+  document.getElementById('oppList').innerHTML = opps.map((o, i) =>
+    `<div class="opp-chip ${i===ci?'active':''}" onclick="selOpp(${i})">${o.propName||'Unnamed'}</div>`
+  ).join('');
+}
+function loadOpp() {
+  if (ci < 0) return;
+  document.getElementById('main').classList.remove('hidden');
+  const o = opps[ci];
+  fields.forEach(f => { const el = $(f); if (el) el.value = o[f] ?? ''; });
+  calc();
+}
+function saveInputs() {
+  if (ci < 0) return;
+  const o = opps[ci];
+  fields.forEach(f => { const el = $(f); if (!el) return; o[f] = el.type==='number' ? (el.value===''?0:parseFloat(el.value)) : el.value; });
+  save();
+}
+function save() { try { localStorage.setItem('reOpps2', JSON.stringify(opps)); } catch(e){} }
+function load() { try { const d = localStorage.getItem('reOpps2'); if (d) opps = JSON.parse(d); } catch(e){} }
+
+function onCountryChange() {
+  const c = $('propCountry').value;
+  const d = COUNTRY_DEFAULTS[c];
+  $('invTax').value = d.tax;
+  $('invNotary').value = d.notary;
+  $('invBroker').value = d.broker;
+}
+
+function $(id) { return document.getElementById(id); }
+const fE = v => v==null?'-':'\u20AC'+Math.round(v).toLocaleString('en-US');
+const fP = v => v==null?'-':(v*100).toFixed(2)+'%';
+const fX = v => v==null?'-':v.toFixed(2)+'x';
+
+function pmt(r, n, pv) { return r===0 ? pv/n : pv*r/(1-Math.pow(1+r,-n)); }
+
+function amort(P, r, n, type) {
+  const s = []; let b = P;
+  if (type === 'amortizing') {
+    const p = pmt(r, n, P);
+    for (let i=0;i<n;i++) { const int=b*r, pr=p-int; b-=pr; if(Math.abs(b)<.01)b=0; s.push({t:p,p:pr,i:int,b}); }
+  } else if (type === 'interest_only') {
+    for (let i=0;i<n;i++) { const int=b*r; s.push({t:int,p:0,i:int,b}); }
+  } else {
+    for (let i=0;i<n;i++) { const int=b*r, pr=i===n-1?b:0; s.push({t:int+pr,p:pr,i:int,b:i===n-1?0:b}); }
+  }
+  return s;
+}
+
+function balAt(s, yr) { return yr<=0?(s.length?s[0].b+s[0].p:0) : yr>s.length?0 : s[yr-1].b; }
+
+function irr(cf, g) {
+  let r = g||0.1;
+  for (let it=0;it<1000;it++) {
+    let npv=0, d=0;
+    for (let i=0;i<cf.length;i++) { const f=Math.pow(1+r,i); npv+=cf[i]/f; d-=i*cf[i]/(f*(1+r)); }
+    if (Math.abs(d)<1e-14) break;
+    const nr = r-npv/d;
+    if (Math.abs(nr-r)<1e-10) return nr;
+    r = nr;
+  }
+  return r;
+}
+
+function setSc(s, el) {
+  sc = s;
+  document.querySelectorAll('.st').forEach(t => t.classList.toggle('active', t.dataset.sc === s));
+  calc();
+}
+
+function calc() {
+  saveInputs();
+  if (ci < 0) return;
+  const o = opps[ci];
+  renderChips();
+
+  // --- Costs ---
+  const sqm = o.propSqm || 1;
+  const bsqm = o.propBSqm || sqm;
+  const price = o.invPrice;
+  const taxAmt = price * o.invTax / 100;
+  const brokerAmt = price * o.invBroker / 100;
+  const acqCosts = taxAmt + o.invNotary + brokerAmt + o.invOtherAcq;
+  const hardTotal = o.invHardPerSqm * bsqm;
+  const softTotal = o.invSoftPerSqm * bsqm;
+  const ffeTotal = o.invFFEPerSqm * bsqm;
+  const contTotal = hardTotal * o.invContingency / 100;
+  const capexTotal = hardTotal + softTotal + ffeTotal + contTotal;
+  const totalCapital = price + acqCosts + capexTotal;
+
+  $('dAcq').textContent = fE(acqCosts);
+  $('dHard').textContent = fE(hardTotal);
+  $('dSoft').textContent = fE(softTotal);
+  $('dFFE').textContent = fE(ffeTotal);
+  $('dCont').textContent = fE(contTotal);
+  $('dTotal').textContent = fE(totalCapital);
+  $('dPerSqm').textContent = sqm > 0 ? fE(totalCapital / sqm) + '/sqm' : '-';
+
+  // --- Operations ---
+  const rents = o.opsRents;
+  const charges = rents * o.opsCharges / 100;
+  const taxes = o.opsTaxes;
+  const admin = o.opsAdmin;
+  const maint = rents * o.opsMaint / 100;
+  const totalCharges = charges + taxes + admin + maint;
+  const noi = rents - totalCharges;
+  const growthRate = o.opsGrowth / 100;
+
+  $('dCharges').textContent = fE(-totalCharges);
+  $('dChargesPct').textContent = rents > 0 ? fP(totalCharges / rents) : '-';
+  $('dNOI').textContent = fE(noi);
+
+  // --- Financing ---
+  const purchaseBase = price + acqCosts;
+  let pLoan = 0, pEq = purchaseBase, pSched = [];
+  const pDebt = o.finPType !== 'equity';
+  $('finPDebt').classList.toggle('hidden', !pDebt);
+  if (pDebt) {
+    pLoan = purchaseBase * o.finPLTC / 100;
+    pEq = purchaseBase - pLoan;
+    pSched = amort(pLoan, o.finPRate / 100, o.finPAmort, o.finPLoanType);
+  }
+  $('fPAmt').textContent = fE(pLoan);
+
+  let cLoan = 0, cEq = capexTotal, cSched = [];
+  const cDebt = o.finCType !== 'equity';
+  $('finCDebt').classList.toggle('hidden', !cDebt);
+  if (cDebt) {
+    cLoan = capexTotal * o.finCLTC / 100;
+    cEq = capexTotal - cLoan;
+    cSched = amort(cLoan, o.finCRate / 100, o.finCAmort, o.finCLoanType);
+  }
+  $('fCAmt').textContent = fE(cLoan);
+
+  const totalDebt = pLoan + cLoan;
+  const totalEq = pEq + cEq;
+  $('fDebt').textContent = fE(totalDebt);
+  $('fEq').textContent = fE(totalEq);
+  $('fDE').textContent = totalEq > 0 ? fX(totalDebt / totalEq) : '-';
+  $('fLTV').textContent = totalCapital > 0 ? fP(totalDebt / totalCapital) : '-';
+
+  // --- KPIs ---
+  const grossYield = totalCapital > 0 ? rents / totalCapital : 0;
+  const netYield = totalCapital > 0 ? noi / totalCapital : 0;
+  $('kGY').textContent = fP(grossYield);
+  $('kNY').textContent = fP(netYield);
+
+  // --- Exit ---
+  const ey = Math.max(1, o.exitYear || 10);
+  const salePrice = o.exitPrice;
+  const saleFeeAmt = salePrice * o.exitFee / 100;
+  const netSale = salePrice - saleFeeAmt;
+  $('exitPSqm').textContent = sqm > 0 ? fE(salePrice / sqm) + '/sqm' : '-';
+
+  // --- Cash Flows ---
+  const maxYr = Math.max(ey, 10);
+  const levCF = [-totalEq], unlCF = [-totalCapital];
+
+  for (let yr = 1; yr <= maxYr; yr++) {
+    const g = Math.pow(1 + growthRate, yr - 1);
+    const yrRents = rents * g;
+    const yrCharges = yrRents * o.opsCharges / 100 + taxes + admin + yrRents * o.opsMaint / 100;
+    const yrNOI = yrRents - yrCharges;
+
+    let dI = 0, dP = 0;
+    if (yr <= pSched.length) { dI += pSched[yr-1].i; dP += pSched[yr-1].p; }
+    if (yr <= cSched.length) { dI += cSched[yr-1].i; dP += cSched[yr-1].p; }
+
+    let saleNet = 0;
+    if (yr === ey && sc !== 'hold_long') {
+      const remP = balAt(pSched, yr), remC = balAt(cSched, yr);
+      const cgt = (netSale - totalCapital) * Math.max(0, o.exitCGT / 100);
+      saleNet = netSale - remP - remC - Math.max(0, cgt);
+    }
+
+    levCF.push(yrNOI - dI - dP + saleNet);
+    unlCF.push(yrNOI + (yr === ey && sc !== 'hold_long' ? netSale : 0));
+  }
+
+  // --- Scenario ---
+  let scCF_l, scCF_u, sName, sHold;
+  if (sc === 'flip') {
+    sHold = 1; sName = 'Flip (Resell Year 1)';
+    const remP = balAt(pSched, 1), remC = balAt(cSched, 1);
+    const cgt = (netSale - totalCapital) * Math.max(0, o.exitCGT / 100);
+    scCF_l = [-totalEq, noi - (pSched[0]?.i||0) - (cSched[0]?.i||0) - (pSched[0]?.p||0) - (cSched[0]?.p||0) + netSale - remP - remC - Math.max(0,cgt)];
+    scCF_u = [-totalCapital, noi + netSale];
+  } else if (sc === 'hold_sell') {
+    sHold = ey; sName = `Hold ${ey}yr & Sell`;
+    scCF_l = levCF.slice(0, ey + 1);
+    scCF_u = unlCF.slice(0, ey + 1);
+  } else {
+    sHold = 20; sName = 'Hold 20yr (No Sale)';
+    scCF_l = [-totalEq]; scCF_u = [-totalCapital];
+    for (let yr=1;yr<=20;yr++) {
+      const g = Math.pow(1+growthRate, yr-1);
+      const yrR = rents*g, yrC = yrR*o.opsCharges/100+taxes+admin+yrR*o.opsMaint/100;
+      let dI=0,dP=0;
+      if(yr<=pSched.length){dI+=pSched[yr-1].i;dP+=pSched[yr-1].p;}
+      if(yr<=cSched.length){dI+=cSched[yr-1].i;dP+=cSched[yr-1].p;}
+      scCF_l.push(yrR-yrC-dI-dP);
+      scCF_u.push(yrR-yrC);
+    }
+  }
+
+  const irrL = scCF_l.length>1?irr(scCF_l,.08):null;
+  const irrU = scCF_u.length>1?irr(scCF_u,.05):null;
+  const cashIn = Math.abs(scCF_l[0]);
+  const cashOut = scCF_l.slice(1).reduce((s,v)=>s+Math.max(0,v),0);
+  const profit = scCF_l.reduce((s,v)=>s+v,0);
+  const mult = cashIn>0?cashOut/cashIn:0;
+  const opYrs = sc==='flip'?1:sc==='hold_sell'?Math.max(1,ey-1):20;
+  const avgCoC = cashIn>0?scCF_l.slice(1,sc==='flip'?2:sc==='hold_sell'?ey:21).reduce((s,v)=>s+v/cashIn,0)/opYrs:0;
+
+  $('kIRR').textContent = irrL!=null&&isFinite(irrL)?fP(irrL):'-';
+  $('kIRRU').textContent = irrU!=null&&isFinite(irrU)?fP(irrU):'-';
+  $('kMult').textContent = fX(mult);
+
+  $('scN').textContent = sName;
+  $('scH').textContent = sHold+' years';
+  $('scCI').textContent = fE(cashIn);
+  $('scCO').textContent = fE(cashOut);
+  $('scP').textContent = fE(profit);
+  $('scP').className = 'tr tw '+(profit>=0?'tg':'tre');
+  $('scIRR').textContent = irrL!=null&&isFinite(irrL)?fP(irrL):'-';
+  $('scIRRU').textContent = irrU!=null&&isFinite(irrU)?fP(irrU):'-';
+  $('scMu').textContent = fX(mult);
+  $('scCoC').textContent = fP(avgCoC);
+
+  // --- CF Table (Levered) ---
+  const dy = Math.min(maxYr, ey > 0 ? ey : 10);
+  let h = '<tr><th></th><th class="tr">Yr 0</th>';
+  for (let y=1;y<=dy;y++) h+=`<th class="tr">Yr ${y}</th>`;
+  h += '</tr>';
+
+  const rows = [
+    {l:'Equity Invested', v:[-totalEq,...Array(dy).fill('')]},
+    {l:'Revenue', v:['',...Array.from({length:dy},(_,i)=>rents*Math.pow(1+growthRate,i))]},
+    {l:'Operating Costs', v:['',...Array.from({length:dy},(_,i)=>{const g=Math.pow(1+growthRate,i);const r=rents*g;return -(r*o.opsCharges/100+taxes+admin+r*o.opsMaint/100);})]},
+    {l:'Loan Interest', v:['',...Array.from({length:dy},(_,i)=>{let v=0;if(i<pSched.length)v+=pSched[i].i;if(i<cSched.length)v+=cSched[i].i;return v>0?-v:'';})]},
+    {l:'Loan Principal', v:['',...Array.from({length:dy},(_,i)=>{let v=0;if(i<pSched.length)v+=pSched[i].p;if(i<cSched.length)v+=cSched[i].p;return v>0?-v:'';})]},
+    {l:'Sale Proceeds (net)', v:['',...Array.from({length:dy},(_,i)=>{
+      if(i+1===ey&&sc!=='hold_long'){const rP=balAt(pSched,ey),rC=balAt(cSched,ey);const cgt=(netSale-totalCapital)*Math.max(0,o.exitCGT/100);return netSale-rP-rC-Math.max(0,cgt);}return '';
+    })]},
+  ];
+  const totR = {l:'Total Cash Flow', v:levCF.slice(0,dy+1), bold:true};
+  const cocR = {l:'Cash-on-Cash', v:['',...levCF.slice(1,dy+1).map(v=>totalEq>0?v/totalEq:0)], pct:true};
+
+  [...rows,totR,cocR].forEach(r => {
+    h += `<tr class="${r.bold?'rh':''}"><td class="${r.bold?'tw':''}">${r.l}</td>`;
+    r.v.slice(0,dy+1).forEach(v => {
+      if(v==='') h+='<td></td>';
+      else if(r.pct) h+=`<td class="tr tm">${typeof v==='number'?fP(v):v}</td>`;
+      else h+=`<td class="tr ${typeof v==='number'&&v<0?'tre':typeof v==='number'&&v>0?'tg':''} ${r.bold?'tw':''}">${typeof v==='number'?fE(v):v}</td>`;
+    });
+    h += '</tr>';
+  });
+  $('cfL').innerHTML = h;
+
+  // Unlevered
+  let h2 = '<tr><th></th><th class="tr">Yr 0</th>';
+  for(let y=1;y<=dy;y++) h2+=`<th class="tr">Yr ${y}</th>`;
+  h2+='</tr>';
+  [{l:'Upfront Costs',v:[-totalCapital,...Array(dy).fill('')]},
+   {l:'Net Operating CF',v:['',...Array.from({length:dy},(_,i)=>{const g=Math.pow(1+growthRate,i);const r=rents*g;return r-(r*o.opsCharges/100+taxes+admin+r*o.opsMaint/100);})]},
+   {l:'Sale Price (net)',v:['',...Array.from({length:dy},(_,i)=>i+1===ey&&sc!=='hold_long'?netSale:'')]},
+   {l:'Total',v:unlCF.slice(0,dy+1),bold:true},
+   {l:'Cash-on-Cash',v:['',...unlCF.slice(1,dy+1).map(v=>totalCapital>0?v/totalCapital:0)],pct:true}
+  ].forEach(r => {
+    h2+=`<tr class="${r.bold?'rh':''}"><td class="${r.bold?'tw':''}">${r.l}</td>`;
+    r.v.slice(0,dy+1).forEach(v => {
+      if(v==='')h2+='<td></td>';
+      else if(r.pct) h2+=`<td class="tr tm">${typeof v==='number'?fP(v):v}</td>`;
+      else h2+=`<td class="tr ${typeof v==='number'&&v<0?'tre':typeof v==='number'&&v>0?'tg':''} ${r.bold?'tw':''}">${typeof v==='number'?fE(v):v}</td>`;
+    });
+    h2+='</tr>';
+  });
+  $('cfU').innerHTML = h2;
+
+  // Amortization
+  const ma = Math.max(pSched.length, cSched.length);
+  let ha = '<tr><th>Year</th><th class="tr">Payment</th><th class="tr">Principal</th><th class="tr">Interest</th><th class="tr">Balance</th></tr>';
+  for(let i=0;i<ma;i++){
+    const pp=i<pSched.length?pSched[i]:{t:0,p:0,i:0,b:0};
+    const cp=i<cSched.length?cSched[i]:{t:0,p:0,i:0,b:0};
+    ha+=`<tr><td>${i+1}</td><td class="tr">${fE(pp.t+cp.t)}</td><td class="tr">${fE(pp.p+cp.p)}</td><td class="tr tre">${fE(pp.i+cp.i)}</td><td class="tr tm">${fE(pp.b+cp.b)}</td></tr>`;
+  }
+  $('amT').innerHTML = ha;
+}
+
+// Init
+load();
+if (opps.length > 0) { ci = 0; renderChips(); loadOpp(); } else renderChips();
+</script>
+</body>
+</html>
